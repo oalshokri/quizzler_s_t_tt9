@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quizzler_s_t_tt9/question.dart';
 import 'package:quizzler_s_t_tt9/quizBrain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -32,26 +33,36 @@ class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
 
   void checkAnswer(bool userChoice) {
-    bool correctAnswer = quizBrain.getQuestionAnswer();
+    if (quizBrain.isFinished()) {
+      print('finished');
 
-    if (correctAnswer == userChoice) {
-      scoreKeeper.add(
-        Icon(
-          Icons.check,
-          color: Colors.green,
-        ),
-      );
+      Alert(context: context, title: "Finished", desc: "you are done").show();
+      setState(() {
+        quizBrain.reset();
+        scoreKeeper.clear();
+      });
     } else {
-      scoreKeeper.add(
-        Icon(
-          Icons.close,
-          color: Colors.red,
-        ),
-      );
+      bool correctAnswer = quizBrain.getQuestionAnswer();
+      setState(() {
+        if (correctAnswer == userChoice) {
+          scoreKeeper.add(
+            Icon(
+              Icons.check,
+              color: Colors.green,
+            ),
+          );
+        } else {
+          scoreKeeper.add(
+            Icon(
+              Icons.close,
+              color: Colors.red,
+            ),
+          );
+        }
+
+        quizBrain.nextQuestion();
+      });
     }
-    setState(() {
-      quizBrain.nextQuestion();
-    });
   }
 
   @override
@@ -118,7 +129,7 @@ class _QuizPageState extends State<QuizPage> {
             ),
           ),
         ),
-        Row(
+        Wrap(
           children: scoreKeeper,
         )
       ],
