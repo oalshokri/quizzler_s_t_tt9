@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:quizzler_s_t_tt9/question.dart';
 import 'package:quizzler_s_t_tt9/quizBrain.dart';
@@ -10,7 +12,8 @@ class Quizzler extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.grey.shade900,
+        // backgroundColor: Colors.grey.shade900,
+        backgroundColor: Colors.grey,
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
@@ -32,36 +35,40 @@ class _QuizPageState extends State<QuizPage> {
 
   List<Icon> scoreKeeper = [];
 
+  int? _choice;
+
   void checkAnswer(bool userChoice) {
+    bool correctAnswer = quizBrain.getQuestionAnswer();
+    setState(() {
+      if (correctAnswer == userChoice) {
+        scoreKeeper.add(
+          Icon(
+            Icons.check,
+            color: Colors.green,
+          ),
+        );
+      } else {
+        scoreKeeper.add(
+          Icon(
+            Icons.close,
+            color: Colors.red,
+          ),
+        );
+      }
+    });
+
     if (quizBrain.isFinished()) {
       print('finished');
 
-      Alert(context: context, title: "Finished", desc: "you are done").show();
-      setState(() {
-        quizBrain.reset();
-        scoreKeeper.clear();
+      Timer(Duration(seconds: 1), () {
+        Alert(context: context, title: "Finished", desc: "you are done").show();
+        setState(() {
+          quizBrain.reset();
+          scoreKeeper.clear();
+        });
       });
     } else {
-      bool correctAnswer = quizBrain.getQuestionAnswer();
-      setState(() {
-        if (correctAnswer == userChoice) {
-          scoreKeeper.add(
-            Icon(
-              Icons.check,
-              color: Colors.green,
-            ),
-          );
-        } else {
-          scoreKeeper.add(
-            Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          );
-        }
-
-        quizBrain.nextQuestion();
-      });
+      quizBrain.nextQuestion();
     }
   }
 
@@ -72,7 +79,6 @@ class _QuizPageState extends State<QuizPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Expanded(
-          flex: 5,
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: Center(
@@ -131,7 +137,40 @@ class _QuizPageState extends State<QuizPage> {
         ),
         Wrap(
           children: scoreKeeper,
-        )
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              ListTile(
+                title: const Text('Thomas Jefferson'),
+                leading: Radio<int>(
+                  value: 1,
+                  groupValue: _choice,
+                  onChanged: (value) {
+                    setState(() {
+                      print(value);
+                      _choice = value;
+                    });
+                  },
+                ),
+              ),
+              ListTile(
+                title: const Text('Thomas Jefferson'),
+                leading: Radio<int>(
+                  value: 2,
+                  groupValue: _choice,
+                  onChanged: (value) {
+                    setState(() {
+                      print(value);
+
+                      _choice = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
